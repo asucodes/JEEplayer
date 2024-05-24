@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="playlist.css">
+</head>
+<body class="bg-gray-100">
+    <div id="playlistContainer" class="container mx-auto p-8"></div>
+
+    <script>
+        const API_KEY = 'AIzaSyCMYIYUed6whYFIGrfrDVsIKHkpx4-Rm94';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const playlistId = params.get('list');
+            if (playlistId) {
+                fetchPlaylistDetails(playlistId).then(details => {
+                    displayPlaylistDetails(details);
+                }).catch(error => {
+                    showError('Error fetching playlist details');
+                });
+            } else {
+                showError('Invalid playlist ID');
+            }
+        });
+
+        async function fetchPlaylistDetails(playlistId) {
+            const playlistUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${API_KEY}`;
+            const playlistResponse = await fetch(playlistUrl);
+            const playlistData = await playlistResponse.json();
+
+            if (playlistData.items.length === 0) {
+                throw new Error('Playlist not found');
+            }
+
+            const playlistTitle = playlistData.items[0].snippet.title;
+
+            const maxResults = 50;
+            const baseUrl = `https://www.googleapis.com/youtube/v3/playlistItems`;
+            let nextPageToken = '';
+            let allVideos = [];
+
+            while (true) {
+                const url = `${baseUrl}?part=snippet&playlistId=${playlistId}&maxResults=${maxResults}&key=${API_KEY}&pageToken=${nextPageToken}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                const videos = data.items.map(item => ({
+                    id: item.snippet.resourceId.videoId,
+                    title: item.snippet.title
+                }));
+                allVideos = allVideos.concat(videos);
+
+                if (data.nextPageToken) {
+                    nextPageToken = data.nextPageToken;
+                } else {
+                    break;
+                }
+            }
+
+            return {
+                title: playlistTitle,
+                videos: allVideos
+            };
+        }
+
+        function displayPlaylistDetails(details) {
+            const playlistContainer = document.getElementById('playlistContainer');
+            const totalVideos = details.videos.length;
+
+            playlistContainer.innerHTML = `
+                <h1 class="text-3xl font-bold mb-4">${details.title}</h1>
+                <p class="text-gray-600 mb-4">Total Videos: ${totalVideos}</p>
+                <ul id="videosList" class="list-disc pl-6"></ul>
+            `;
+
+            const videosList = document.getElementById('videosList');
+            details.videos.forEach(video => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a'); // Create a link element
+                link.textContent = video.title;
+                link.href = `video.html?id=${video.id}`; // Set href attribute to video.html with video ID as query parameter
+                link.classList.add('text-blue-500', 'mb-2');
+                listItem.appendChild(link); // Append the link to the list item
+                videosList.appendChild(listItem);
+            });
+        }
+
+        function showError(message) {
+            const playlistContainer = document.getElementById('playlistContainer');
+            const errorMessage = document.createElement('div');
+            errorMessage.textContent = message;
+            errorMessage.classList.add('error-message', 'text-red-500', 'font-bold');
+            playlistContainer.appendChild(errorMessage);
+        }
+    </script>
+</body>
+</html>
