@@ -1,12 +1,60 @@
 body {
-    font-family: Arial, sans-serif;
+    background-color: #121212;
 }
 
+
 .container {
-    width: 80%;
-    margin: auto;
-    text-align: center;
+    max-width: 800px;
+    margin: 0 auto; /* Center the container */
+    padding: 20px;
 }
+
+
+
+
+#playlistForm {
+    margin-top: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#playlistInput {
+    width: 60%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+#addPlaylistButton {
+    padding: 10px 20px;
+    background-color: #007bff; /* Set button background color */
+    color: #fff; /* Set button text color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#addPlaylistButton:hover {
+    background-color: #0056b3; /* Change button color on hover */
+}
+.deleteButton {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #dc3545; /* Set button background color */
+    color: #fff; /* Set button text color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.deleteButton:hover {
+    background-color: #c82333; /* Change button color on hover */
+}
+
 
 #playlistsContainer {
     display: flex;
@@ -16,6 +64,57 @@ body {
 
 .playlist {
     margin: 10px;
+    padding: 10px;
+    background-color: #fff; /* Set box background color */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.playlist img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.playlist h3 {
+    text-align: center;
+    color: #333; /* Set text color */
+    margin-bottom: 10px;
+}
+
+.removeButton {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #dc3545; /* Set button background color */
+    color: #fff; /* Set button text color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.removeButton:hover {
+    background-color: #c82333; /* Change button color on hover */
+}
+
+#addMoreButton {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745; /* Set button background color */
+    color: #fff; /* Set button text color */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#addMoreButton:hover {
+    background-color: #218838; /* Change button color on hover */
 }
 
 iframe {
