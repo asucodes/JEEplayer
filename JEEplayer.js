@@ -104,13 +104,15 @@ function displayPlaylist(playlistId, details) {
 
     const playlistTitle = document.createElement('h3');
     playlistTitle.textContent = details.title;
+    playlistTitle.classList.add('playlist-title'); // Add a class to the playlist title for styling
     playlistTitle.addEventListener('click', function() {
-        window.location.href = 'playlist.html?list=' + playlistId;
+        window.location.href = `playlist.html?list=${playlistId}`; // Redirect to playlist.html with playlist ID as query parameter
     });
     playlistContainer.appendChild(playlistTitle);
 
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove Playlist';
+    removeButton.classList.add('deleteButton'); // Add the deleteButton class
     removeButton.addEventListener('click', function() {
         removePlaylist(playlistId);
     });
@@ -118,6 +120,7 @@ function displayPlaylist(playlistId, details) {
 
     document.getElementById('playlistsContainer').appendChild(playlistContainer);
 }
+
 
 
 
@@ -233,4 +236,51 @@ function fetchPlaylistDetails(playlistId) {
             throw error;
         });
 }
+// Updated JavaScript code for playlist.js
+
+// Function to display playlist with checkboxes and watched status
+function displayPlaylistWithWatchedStatus(playlistWithWatchedStatus) {
+    const playlistContainer = document.getElementById('playlistContainer');
+
+    // Clear existing content
+    playlistContainer.innerHTML = '';
+
+    // Iterate through playlist and display videos with checkboxes and watched status
+    playlistWithWatchedStatus.forEach(video => {
+        const videoItem = document.createElement('div');
+        videoItem.classList.add('video-item');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = video.watched; // Set checkbox state based on watched status
+        checkbox.addEventListener('change', () => {
+            // Update watched status in database when checkbox state changes
+            updateWatchedStatus(video.id, checkbox.checked);
+        });
+
+        const videoTitle = document.createElement('span');
+        videoTitle.textContent = video.title;
+
+        videoItem.appendChild(checkbox);
+        videoItem.appendChild(videoTitle);
+
+        playlistContainer.appendChild(videoItem);
+    });
+}
+
+// Function to update watched status in database
+function updateWatchedStatus(videoId, watched) {
+    // Update IndexedDB with the new watched status for the specified video ID
+    // You can use the IndexedDB API similar to how you added and retrieved playlists
+}
+
+// Function to load playlist and watched status from database
+function loadPlaylistWithWatchedStatus() {
+    // Retrieve playlist and watched status from IndexedDB
+    // You can use the IndexedDB API to retrieve data from the database
+    // Once data is retrieved, call displayPlaylistWithWatchedStatus to render the playlist
+}
+
+// Call loadPlaylistWithWatchedStatus when the page loads to initialize the playlist
+document.addEventListener('DOMContentLoaded', loadPlaylistWithWatchedStatus);
 
