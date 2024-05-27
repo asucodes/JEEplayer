@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-7RP1LW6MRK');
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEE Player</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="JEEplayer.css"> <!-- Include your custom CSS -->
+</head>
+<body >
+    <div class="container mx-auto p-8 text-center">
+        <img src="images/cooltext459035275756508.png" alt="JEE Player Logo" class="mb-4">
+        <h1 class="display-4 mb-4"> </h1>
+        <form id="playlistForm" class="mb-8 mt-4"> <!-- Added mt-4 class -->
+            <input type="text" id="playlistInput" placeholder="Enter YouTube Playlist Link" required>
+            <button id="addPlaylistButton" type="submit">Add Playlist</button>
+        </form>
+        <div id="playlistsContainer"></div>
+        <button id="addMoreButton">Add More Playlists</button>
+    </div>
+
+    <script src="JEEplayer.js"></script> <!-- Include your custom JS -->
+</body>
+</html>
