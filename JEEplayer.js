@@ -21,28 +21,25 @@ function initDB() {
         request.onupgradeneeded = function(event) {
             const db = event.target.result;
             const playlistStore = db.createObjectStore('playlists', { keyPath: 'id' });
-            // You can add more object stores or indexes here if needed
             resolve(db);
         };
     });
 }
 
-// Call the initDB function to initialize IndexedDB
 dbPromise = initDB();
 
-// Function to add playlist to IndexedDB
 function addPlaylistToDB(playlist) {
     dbPromise.then(db => {
         if (!db) {
             console.error('IndexedDB not initialized.');
             return;
         }
-        
+
         const transaction = db.transaction(['playlists'], 'readwrite');
         const store = transaction.objectStore('playlists');
         const requestAdd = store.add(playlist);
 
-        requestAdd.onsuccess = function(event) {
+        requestAdd.onsuccess = function() {
             console.log('Playlist added to IndexedDB');
         };
 
@@ -54,7 +51,6 @@ function addPlaylistToDB(playlist) {
     });
 }
 
-// Function to get all playlists from IndexedDB
 function getAllPlaylistsFromDB(callback) {
     dbPromise.then(db => {
         if (!db) {
@@ -64,11 +60,10 @@ function getAllPlaylistsFromDB(callback) {
 
         const transaction = db.transaction(['playlists'], 'readonly');
         const store = transaction.objectStore('playlists');
-        const requestGetAll = store.getAll(); // Changed variable name to requestGetAll
+        const requestGetAll = store.getAll();
 
         requestGetAll.onsuccess = function(event) {
-            const playlists = event.target.result;
-            callback(playlists);
+            callback(event.target.result);
         };
 
         requestGetAll.onerror = function(event) {
@@ -80,63 +75,51 @@ function getAllPlaylistsFromDB(callback) {
     });
 }
 
-// Function to load playlists after the DOM has loaded
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
     loadPlaylists();
 });
 
-// Function to display playlists
-// Function to display playlists
 function displayPlaylist(playlistId, details) {
     const playlistContainer = document.createElement('div');
     playlistContainer.className = 'playlist';
-    
-    // Check if the details object and thumbnails property exist
-    if (details && details.thumbnails && details.thumbnails.default && details.thumbnails.default.url) {
+
+    if (details?.thumbnails?.default?.url) {
         const thumbnailImg = document.createElement('img');
         thumbnailImg.src = details.thumbnails.default.url;
         thumbnailImg.alt = details.title;
         playlistContainer.appendChild(thumbnailImg);
     } else {
-        console.error('Invalid details object or missing thumbnails property:', details);
-        return; // Exit the function if thumbnails property is missing
+        console.error('Missing thumbnails:', details);
+        return;
     }
 
     const playlistTitle = document.createElement('h3');
     playlistTitle.textContent = details.title;
-    playlistTitle.classList.add('playlist-title'); // Add a class to the playlist title for styling
-    playlistTitle.addEventListener('click', function() {
-        window.location.href = `playlist.html?list=${playlistId}`; // Redirect to playlist.html with playlist ID as query parameter
+    playlistTitle.addEventListener('click', () => {
+        window.location.href = `playlist.html?list=${playlistId}`;
     });
     playlistContainer.appendChild(playlistTitle);
 
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove Playlist';
-    removeButton.classList.add('deleteButton'); // Add the deleteButton class
-    removeButton.addEventListener('click', function() {
-        removePlaylist(playlistId);
-    });
+    removeButton.addEventListener('click', () => removePlaylist(playlistId));
     playlistContainer.appendChild(removeButton);
 
     document.getElementById('playlistsContainer').appendChild(playlistContainer);
 }
 
-
-
-
-// Function to remove playlist
 function removePlaylist(playlistId) {
     dbPromise.then(db => {
         if (!db) {
             console.error('IndexedDB not initialized.');
             return;
         }
-        
+
         const transaction = db.transaction(['playlists'], 'readwrite');
         const store = transaction.objectStore('playlists');
         const requestDelete = store.delete(playlistId);
 
-        requestDelete.onsuccess = function(event) {
+        requestDelete.onsuccess = function() {
             console.log('Playlist removed from IndexedDB');
             document.getElementById('playlistsContainer').innerHTML = '';
             loadPlaylists();
@@ -150,24 +133,22 @@ function removePlaylist(playlistId) {
     });
 }
 
-// Function to load playlists
 function loadPlaylists() {
-    getAllPlaylistsFromDB(function(playlists) {
-        if (playlists) {
+    getAllPlaylistsFromDB(playlists => {
+        if (playlists?.length > 0) {
             playlists.forEach(playlist => {
-                if (playlist.details && playlist.details.thumbnails) {
+                if (playlist?.details?.thumbnails) {
                     displayPlaylist(playlist.id, playlist.details);
                 } else {
                     console.error('Invalid playlist details:', playlist);
                 }
             });
         } else {
-            console.log('No playlists found in IndexedDB');
+            console.log('No playlists found.');
         }
     });
 }
 
-// Function to show error message
 function showError(message) {
     const errorMessage = document.getElementById('errorMessage');
     errorMessage.textContent = message;
@@ -176,28 +157,25 @@ function showError(message) {
     }, 3000);
 }
 
-// Event listener for adding more playlists
 document.getElementById('addMoreButton').addEventListener('click', function() {
     document.getElementById('playlistForm').style.display = 'block';
 });
 
-// Event listener for adding playlist
 document.getElementById('addPlaylistButton').addEventListener('click', function(event) {
     event.preventDefault();
     const playlistInput = document.getElementById('playlistInput').value;
     addPlaylist(playlistInput);
 });
 
-// Function to add playlist
 function addPlaylist(playlistUrl) {
     const playlistId = extractPlaylistId(playlistUrl);
     if (playlistId) {
         fetchPlaylistDetails(playlistId).then(details => {
-            addPlaylistToDB({ id: playlistId, details: details }); // Store playlist in IndexedDB
+            addPlaylistToDB({ id: playlistId, details });
             displayPlaylist(playlistId, details);
             document.getElementById('playlistForm').reset();
             document.getElementById('playlistForm').style.display = 'none';
-        }).catch(error => {
+        }).catch(() => {
             showError('Invalid Playlist URL or API Error');
         });
     } else {
@@ -205,7 +183,6 @@ function addPlaylist(playlistUrl) {
     }
 }
 
-// Function to extract playlist ID from URL
 function extractPlaylistId(url) {
     try {
         const urlObj = new URL(url);
@@ -214,23 +191,20 @@ function extractPlaylistId(url) {
             return urlParams.get('list');
         }
         return null;
-    } catch (e) {
+    } catch {
         return null;
     }
 }
 
-// Function to fetch playlist details
 function fetchPlaylistDetails(playlistId) {
     return fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${API_KEY}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+            return response.json();
+        })
         .then(data => {
-            if (data.items && data.items.length > 0) {
-                const snippet = data.items[0].snippet;
-                if (snippet && snippet.thumbnails) {
-                    return snippet;
-                } else {
-                    throw new Error('Playlist details are incomplete or missing thumbnails');
-                }
+            if (data.items?.length > 0) {
+                return data.items[0].snippet;
             } else {
                 throw new Error('Playlist not found or empty');
             }
@@ -240,25 +214,19 @@ function fetchPlaylistDetails(playlistId) {
             throw error;
         });
 }
-// Updated JavaScript code for playlist.js
 
-// Function to display playlist with checkboxes and watched status
 function displayPlaylistWithWatchedStatus(playlistWithWatchedStatus) {
     const playlistContainer = document.getElementById('playlistContainer');
-
-    // Clear existing content
     playlistContainer.innerHTML = '';
 
-    // Iterate through playlist and display videos with checkboxes and watched status
     playlistWithWatchedStatus.forEach(video => {
         const videoItem = document.createElement('div');
         videoItem.classList.add('video-item');
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.checked = video.watched; // Set checkbox state based on watched status
+        checkbox.checked = video.watched || false;
         checkbox.addEventListener('change', () => {
-            // Update watched status in database when checkbox state changes
             updateWatchedStatus(video.id, checkbox.checked);
         });
 
@@ -267,24 +235,28 @@ function displayPlaylistWithWatchedStatus(playlistWithWatchedStatus) {
 
         videoItem.appendChild(checkbox);
         videoItem.appendChild(videoTitle);
-
         playlistContainer.appendChild(videoItem);
     });
 }
 
-// Function to update watched status in database
 function updateWatchedStatus(videoId, watched) {
-    // Update IndexedDB with the new watched status for the specified video ID
-    // You can use the IndexedDB API similar to how you added and retrieved playlists
+    dbPromise.then(db => {
+        const tx = db.transaction('playlists', 'readwrite');
+        const store = tx.objectStore('playlists');
+        const getRequest = store.get(videoId);
+
+        getRequest.onsuccess = function() {
+            const video = getRequest.result;
+            video.watched = watched;
+
+            const putRequest = store.put(video);
+            putRequest.onsuccess = () => console.log('Watched status updated.');
+        };
+    });
 }
 
-// Function to load playlist and watched status from database
-function loadPlaylistWithWatchedStatus() {
-    // Retrieve playlist and watched status from IndexedDB
-    // You can use the IndexedDB API to retrieve data from the database
-    // Once data is retrieved, call displayPlaylistWithWatchedStatus to render the playlist
-}
-
-// Call loadPlaylistWithWatchedStatus when the page loads to initialize the playlist
 document.addEventListener('DOMContentLoaded', loadPlaylistWithWatchedStatus);
 
+function loadPlaylistWithWatchedStatus() {
+    // To implement: Retrieve playlists and watched status
+}
