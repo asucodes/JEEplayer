@@ -208,8 +208,12 @@ function addPlaylist(playlistUrl) {
 // Function to extract playlist ID from URL
 function extractPlaylistId(url) {
     try {
-        const urlParams = new URLSearchParams(new URL(url).search);
-        return urlParams.get('list');
+        const urlObj = new URL(url);
+        if (urlObj.hostname.includes('youtube.com') || urlObj.hostname === 'youtu.be') {
+            const urlParams = new URLSearchParams(urlObj.search);
+            return urlParams.get('list');
+        }
+        return null;
     } catch (e) {
         return null;
     }
