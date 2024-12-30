@@ -1,4 +1,4 @@
-const API_KEY = 'AIzaSyCvWQOdIqBpyAcu65o7ME_RFDfagkSZaUI'; // Your YouTube Data API key
+const API_KEY = 'AIzaSyAfxLXBJZA_zZgBKuZ8vIAW7U40dZ8XGNU'; // Your YouTube Data API key
 
 let dbPromise;
 let db; // Define db in the global scope
